@@ -6,23 +6,28 @@ output:
   github_document
 ---
 
-```{r set-options_02, echo = FALSE, cache = FALSE}
+```{r, echo = FALSE, cache = FALSE}
+knitr::opts_chunk$set(fig.retina = 2.5)
 options(width = 100)
 ```
 
 # Small Worlds and Large Worlds
 
-A while back The Oatmeal put together an [infographic on Christopher Columbus](http://theoatmeal.com/comics/columbus_day). I'm no historian and cannot vouch for its accuracy, so make of it what you will.
+A while back The Oatmeal put together an [infographic on Christopher Columbus](https://theoatmeal.com/comics/columbus_day). I'm no historian and cannot vouch for its accuracy, so make of it what you will.
 
 McElreath described the thrust of this chapter this way:
 
-> In this chapter, you will begin to build Bayesian models. The way that Bayesian models learn from evidence is arguably optimal in the small world. When their assumptions approximate reality, they also perform well in the large world. But large world performance has to be demonstrated rather than logically deduced. (p. 20)
+> In this chapter, you will begin to build Bayesian models. The way that Bayesian models learn from evidence is arguably optimal in the small world. When their assumptions approximate reality, they also perform well in the large world. But large world performance has to be demonstrated rather than logically deduced. [@mcelreathStatisticalRethinkingBayesian2015, p. 20]
 
 Indeed.
 
 ## The garden of forking data
 
-Gelman and Loken wrote a [great paper by this name](http://www.stat.columbia.edu/~gelman/research/unpublished/p_hacking.pdf).
+Gelman and Loken [-@gelmanGardenForkingPaths2013] wrote a [great paper of a similar name](https://stat.columbia.edu/~gelman/research/unpublished/p_hacking.pdf) and topic. The titles from this section and Gelman and Loken's paper have their origins in the short story by [Jorge Luis Borges](https://en.wikipedia.org/wiki/Jorge_Luis_Borges) [-@borgesjlJardinSenderosQue1941], *The garden of forking paths*. You can find copies of the original short story [here](https://archive.org/stream/TheGardenOfForkingPathsJorgeLuisBorges1941/The-Garden-of-Forking-Paths-Jorge-Luis-Borges-1941_djvu.txt) or [here](https://genius.com/Jorge-luis-borges-the-garden-of-forking-paths-annotated). Here's a snip:
+
+> In all fictional works, each time a man is confronted with several alternatives, he chooses one and eliminates the others; in the fiction of Ts'ui Pên, he chooses--simultaneously--all of them. He creates, in this way, diverse futures, diverse times which themselves also proliferate and fork.
+
+The choices we make in our data analyses proliferate and fork in this way, too.
 
 ### Counting possibilities.
 
@@ -32,19 +37,19 @@ Throughout this project, we'll use the [tidyverse](https://www.tidyverse.org) fo
 library(tidyverse)
 ```
 
-If you are new to tidyverse-style syntax, possibly the oddest component is the pipe (i.e., `%>%`). I’m not going to explain the `%>%` in this project, but you might learn more about in [this brief clip](https://www.youtube.com/watch?v=9yjhxvu-pDg), starting around [minute 21:25 in this talk by Wickham](https://www.youtube.com/watch?v=K-ss_ag2k9E&t=1285s), or in [section 5.6.1 from Grolemund and Wickham’s *R for Data Science*](http://r4ds.had.co.nz/transform.html#combining-multiple-operations-with-the-pipe). Really, all of Chapter 5 of *R4DS* is just great for new R and new tidyverse users. And *R4DS* Chapter 3 is a nice introduction to plotting with ggplot2.
+If you are new to tidyverse-style syntax, possibly the oddest component is the pipe (i.e., `%>%`). I'm not going to explain the `%>%` in this project, but you might learn more about in [this brief clip](https://www.youtube.com/watch?v=9yjhxvu-pDg), starting around [minute 21:25 in this talk by Wickham](https://www.youtube.com/watch?v=K-ss_ag2k9E&t=1285s), or in [Section 5.6.1 from Grolemund and Wickham's *R for data science*](https://r4ds.had.co.nz/transform.html#combining-multiple-operations-with-the-pipe). Really, all of Chapter 5 of *R4DS* is just great for new R and new tidyverse users. And *R4DS* Chapter 3 is a nice introduction to plotting with ggplot2.
 
-Other than the pipe, the other big thing to be aware of is [tibbles](https://tibble.tidyverse.org). For our purposes, think of a tibble as a data object with two dimensions defined by rows and columns. And importantly, tibbles are just special types of [data frames](https://bookdown.org/rdpeng/rprogdatascience/r-nuts-and-bolts.html#data-framesbookdown::preview_chapter("06.Rmd")). So whenever we talk about data frames, we’re also talking about tibbles. For more on the topic, check out [*R4SD*, Chapter 10](http://r4ds.had.co.nz/tibbles.html).
+Other than the pipe, the other big thing to be aware of is [tibbles](https://tibble.tidyverse.org) [@R-tibble]. For our purposes, think of a tibble as a data object with two dimensions defined by rows and columns. And importantly, tibbles are just special types of [data frames](https://bookdown.org/rdpeng/rprogdatascience/r-nuts-and-bolts.html#data-frames). So whenever we talk about data frames, we're also talking about tibbles. For more on the topic, check out [*R4SD*, Chapter 10](https://r4ds.had.co.nz/tibbles.html).
 
-So, if we're willing to code the marbles as 0 = "white" 1 = "blue", we can arrange the possibility data in a tibble as follows.
+If we're willing to code the marbles as 0 = "white" 1 = "blue", we can arrange the possibility data in a tibble as follows.
 
 ```{r, warning = F, message = F}
 d <-
-  tibble(p_1 = 0,
-         p_2 = rep(1:0, times = c(1, 3)),
-         p_3 = rep(1:0, times = c(2, 2)),
-         p_4 = rep(1:0, times = c(3, 1)),
-         p_5 = 1)
+  tibble(p1 = 0,
+         p2 = rep(1:0, times = c(1, 3)),
+         p3 = rep(1:0, times = c(2, 2)),
+         p4 = rep(1:0, times = c(3, 1)),
+         p5 = 1)
 
 head(d)
 ```
@@ -67,13 +72,13 @@ d %>%
   theme(legend.position = "none")
 ```
 
-As a quick aside, check out Suzan Baert's blog post [*Data Wrangling Part 2: Transforming your columns into the right shape*](https://suzan.rbind.io/2018/02/dplyr-tutorial-2/) for an extensive discussion on `dplyr::mutate()` and `dplyr::gather()`.
+As a quick aside, check out Suzan Baert's blog post [*Data wrangling part 2: Transforming your columns into the right shape*](https://suzan.rbind.io/2018/02/dplyr-tutorial-2/) for an extensive discussion on `dplyr::mutate()` and `dplyr::gather()`.
 
 Here's the basic structure of the possibilities per marble draw.
 
 ```{r}
-tibble(draw            = 1:3,
-       marbles         = 4) %>% 
+tibble(draw    = 1:3,
+       marbles = 4) %>% 
   mutate(possibilities = marbles ^ draw) %>% 
   knitr::kable()
 ```
@@ -89,10 +94,10 @@ If you walk that out a little, you can structure the data required to approach F
          draw     = rep(1:3, times = c(4^1, 4^2, 4^3)),
          fill     = rep(c("b", "w"), times = c(1, 3)) %>% 
            rep(., times = c(4^0 + 4^1 + 4^2)))
-  )
+)
 ```
 
-See what I did there with the parentheses? If you assign a value to an object in R (e.g., `dog <- 1`) and just hit return, nothing will immediately pop up in the [console](http://r4ds.had.co.nz/introduction.html#rstudio). You have to actually execute `dog` before R will return `1`. But if you wrap the code within parentheses (e.g., `(dog <- 1)`), R will perform the assignment and return the value as if you had executed `dog`.
+See what I did there with the parentheses? If you assign a value to an object in R (e.g., `dog <- 1`) and just hit return, nothing will immediately pop up in the [console](https://r4ds.had.co.nz/introduction.html#prerequisites). You have to actually execute `dog` before R will return `1`. But if you wrap the code within parentheses (e.g., `(dog <- 1)`), R will perform the assignment and return the value as if you had executed `dog`.
 
 But we digress. Here's the initial plot.
 
@@ -103,8 +108,8 @@ d %>%
              shape = 21, size = 3) +
   scale_y_continuous(breaks = 1:3) +
   scale_fill_manual(values  = c("navy", "white")) +
-  theme(panel.grid.minor = element_blank(),
-        legend.position  = "none")
+  theme(legend.position = "none",
+        panel.grid.minor = element_blank())
 ```
 
 To my mind, the easiest way to connect the dots in the appropriate way is to make two auxiliary tibbles.
@@ -117,7 +122,7 @@ To my mind, the easiest way to connect the dots in the appropriate way is to mak
          xend = ((1:4^2) / 4),
          y    = 1,
          yend = 2)
-  )
+)
 
 # these will connect the dots from the second and third draws
 (
@@ -126,7 +131,7 @@ To my mind, the easiest way to connect the dots in the appropriate way is to mak
          xend = (1:4^3) / (4^2),
          y    = 2,
          yend = 3)
-  )
+)
 ```
 
 We can use the `lines_1` and `lines_2` data in the plot with two `geom_segment()` functions.
@@ -134,23 +139,23 @@ We can use the `lines_1` and `lines_2` data in the plot with two `geom_segment()
 ```{r, fig.width = 8, fig.height = 2}
 d %>% 
   ggplot(aes(x = position, y = draw)) +
-  geom_segment(data  = lines_1,
+  geom_segment(data = lines_1,
                aes(x = x, xend = xend,
                    y = y, yend = yend),
-               size  = 1/3) +
-  geom_segment(data  = lines_2,
+               size = 1/3) +
+  geom_segment(data = lines_2,
                aes(x = x, xend = xend,
                    y = y, yend = yend),
-               size  = 1/3) +
+               size = 1/3) +
   geom_point(aes(fill = fill),
              shape = 21, size = 3) +
   scale_y_continuous(breaks = 1:3) +
-  scale_fill_manual(values  = c("navy", "white")) +
-  theme(panel.grid.minor = element_blank(),
-        legend.position  = "none")
+  scale_fill_manual(values = c("navy", "white")) +
+  theme(legend.position = "none",
+        panel.grid.minor = element_blank())
 ```
 
-We've generated the values for `position` (i.e., the x-axis), in such a way that they're all justified to the right, so to speak. But we'd like to center them. For `draw == 1`, we'll need to subtract 0.5 from each. For `draw == 2`, we need to reduce the scale by a factor of 4 and we'll then need to reduce the scale by another factor of 4 for `draw == 3`. The `ifelse()` function will be of use for that.
+We've generated the values for `position` (i.e., the $x$-axis), in such a way that they're all justified to the right, so to speak. But we'd like to center them. For `draw == 1`, we'll need to subtract 0.5 from each. For `draw == 2`, we need to reduce the scale by a factor of 4 and we'll then need to reduce the scale by another factor of 4 for `draw == 3`. The `ifelse()` function will be of use for that.
 
 ```{r}
 d <-
@@ -158,7 +163,7 @@ d <-
   mutate(denominator = ifelse(draw == 1, .5,
                               ifelse(draw == 2, .5 / 4,
                                      .5 / 4^2))) %>% 
-  mutate(position    = position - denominator)
+  mutate(position = position - denominator)
 
 d
 ```
@@ -186,43 +191,43 @@ Now the plot's looking closer.
 ```{r, fig.width = 8, fig.height = 2}
 d %>% 
   ggplot(aes(x = position, y = draw)) +
-  geom_segment(data  = lines_1,
+  geom_segment(data = lines_1,
                aes(x = x, xend = xend,
                    y = y, yend = yend),
-               size  = 1/3) +
-  geom_segment(data  = lines_2,
+               size = 1/3) +
+  geom_segment(data = lines_2,
                aes(x = x, xend = xend,
                    y = y, yend = yend),
-               size  = 1/3) +
+               size = 1/3) +
   geom_point(aes(fill = fill),
              shape = 21, size = 3) +
   scale_y_continuous(breaks = 1:3) +
-  scale_fill_manual(values  = c("navy", "white")) +
-  theme(panel.grid.minor = element_blank(),
-        legend.position  = "none")
+  scale_fill_manual(values = c("navy", "white")) +
+  theme(legend.position = "none",
+        panel.grid.minor = element_blank())
 ```
 
-For the final step, we'll use `coord_polar()` to change the [coordinate system](http://sape.inf.usi.ch/quick-reference/ggplot2/coord), giving the plot a mandala-like feel.
+For the final step, we'll use `coord_polar()` to change the [coordinate system](https://ggplot2.tidyverse.org/reference/coord_polar.html), giving the plot a mandala-like feel.
 
 ```{r, fig.width = 4, fig.height = 4}
 d %>% 
   ggplot(aes(x = position, y = draw)) +
-  geom_segment(data  = lines_1,
+  geom_segment(data = lines_1,
                aes(x = x, xend = xend,
                    y = y, yend = yend),
-               size  = 1/3) +
-  geom_segment(data  = lines_2,
+               size = 1/3) +
+  geom_segment(data = lines_2,
                aes(x = x, xend = xend,
                    y = y, yend = yend),
-               size  = 1/3) +
+               size = 1/3) +
   geom_point(aes(fill = fill),
              shape = 21, size = 4) +
-  scale_fill_manual(values  = c("navy", "white")) +
+  scale_fill_manual(values = c("navy", "white")) +
   scale_x_continuous(NULL, limits = c(0, 4), breaks = NULL) +
   scale_y_continuous(NULL, limits = c(0.75, 3), breaks = NULL) +
-  theme(panel.grid      = element_blank(),
-        legend.position = "none") +
-  coord_polar()
+  coord_polar() +
+  theme(legend.position = "none",
+        panel.grid = element_blank())
 ```
 
 To make our version of Figure 2.3, we'll have to add an index to tell us which paths remain logically valid after each choice. We'll call the index `remain`.
@@ -252,37 +257,37 @@ d <-
 # finally, the plot:
 d %>% 
   ggplot(aes(x = position, y = draw)) +
-  geom_segment(data  = lines_1,
+  geom_segment(data = lines_1,
                aes(x = x, xend = xend,
                    y = y, yend = yend,
                    alpha = remain %>% as.character()),
-               size  = 1/3) +
-  geom_segment(data  = lines_2,
+               size = 1/3) +
+  geom_segment(data = lines_2,
                aes(x = x, xend = xend,
                    y = y, yend = yend,
                    alpha = remain %>% as.character()),
-               size  = 1/3) +
+               size = 1/3) +
   geom_point(aes(fill = fill, alpha = remain %>% as.character()),
              shape = 21, size = 4) +
   # it's the alpha parameter that makes elements semitransparent
   scale_alpha_manual(values = c(1/10, 1)) +
-  scale_fill_manual(values  = c("navy", "white")) +
+  scale_fill_manual(values = c("navy", "white")) +
   scale_x_continuous(NULL, limits = c(0, 4), breaks = NULL) +
   scale_y_continuous(NULL, limits = c(0.75, 3), breaks = NULL) +
-  theme(panel.grid      = element_blank(),
-        legend.position = "none") +
-  coord_polar()
+  coord_polar() +
+  theme(legend.position = "none",
+        panel.grid = element_blank())
 ```
 
 Letting "w" = a white dot and "b" = a blue dot, we might recreate the table in the middle of page 23 like so.
 
 ```{r}
 # if we make two custom functions, here, it will simplify the code within `mutate()`, below
-n_blue <- function(x){
+n_blue <- function(x) {
   rowSums(x == "b")
 }
 
-n_white <- function(x){
+n_white <- function(x) {
   rowSums(x == "w")
 }
 
@@ -300,6 +305,8 @@ t <-
 t %>% 
   knitr::kable()
 ```
+
+If you are new to making custom functions in R, you might check out [Chapter 19 in *R4DS*](https://r4ds.had.co.nz/functions.html) or [Chapter 14 in *R programming for data science*](https://bookdown.org/rdpeng/rprogdatascience/functions.html) [@pengProgrammingDataScience2019].
 
 We'll need new data for Figure 2.4. Here's the initial primary data, `d`.
 
@@ -331,13 +338,13 @@ d <-
   mutate(position = ifelse(pie_index == "a", position,
                            ifelse(pie_index == "b", position + 4,
                                   position + 4 * 2)))
-  )
+)
 ```
 
 Both `lines_1` and `lines_2` require adjustments for `x` and `xend`. Our current approach is a nested `ifelse()`. Rather than copy and paste that multi-line `ifelse()` code for all four, let's wrap it in a compact function, which we'll call `move_over()`.
 
 ```{r}
-move_over <- function(position, index){
+move_over <- function(position, index) {
   ifelse(index == "a", position,
          ifelse(index == "b", position + 4,
                 position + 4 * 2)
@@ -345,9 +352,7 @@ move_over <- function(position, index){
   }
 ```
 
-If you’re new to making your own R functions, check out [Chapter 19](http://r4ds.had.co.nz/functions.html) of *R4DS* or [Chapter 14](https://bookdown.org/rdpeng/rprogdatascience/functions.html) of *R Programming for Data Science*.
-
-Anyway, now we'll make our new `lines_1` and `lines_2` data, for which we'll use `move_over()` to adjust their `x` and `xend` positions to the correct spots.
+Now we'll make our new `lines_1` and `lines_2` data, for which we'll use `move_over()` to adjust their `x` and `xend` positions to the correct spots.
 
 ```{r}
 (
@@ -363,7 +368,7 @@ Anyway, now we'll make our new `lines_1` and `lines_2` data, for which we'll use
   # to get the position axis correct for `pie_index == "b"` or `"c"`, we'll need to offset
   mutate(x    = move_over(position = x,    index = pie_index),
          xend = move_over(position = xend, index = pie_index))
-  )
+)
 
 (
   lines_2 <-
@@ -378,7 +383,7 @@ Anyway, now we'll make our new `lines_1` and `lines_2` data, for which we'll use
   # to get the position axis correct for `pie_index == "b"` or `"c"`, we'll need to offset
   mutate(x    = move_over(position = x,    index = pie_index),
          xend = move_over(position = xend, index = pie_index))
-  )
+)
 ```
 
 For the last data wrangling step, we add the `remain` indices to help us determine which parts to make semitransparent. I'm not sure of a slick way to do this, so these are the result of brute force counting.
@@ -442,32 +447,32 @@ lines_2 <-
          )
 ```
 
-We're finally ready to plot our Figure 2.4.
+We're finally ready to plot our Figure 2.4!
 
 ```{r, fig.width = 7, fig.height = 7}
 d %>% 
   ggplot(aes(x = position, y = draw)) +
   geom_vline(xintercept = c(0, 4, 8), color = "white", size = 2/3) +
-  geom_segment(data  = lines_1,
+  geom_segment(data = lines_1,
                aes(x = x, xend = xend,
                    y = y, yend = yend,
                    alpha = remain %>% as.character()),
-               size  = 1/3) +
-  geom_segment(data  = lines_2,
+               size = 1/3) +
+  geom_segment(data = lines_2,
                aes(x = x, xend = xend,
                    y = y, yend = yend,
                    alpha = remain %>% as.character()),
-               size  = 1/3) +
+               size = 1/3) +
   geom_point(aes(fill = fill, size = draw, alpha = remain %>% as.character()),
              shape = 21) +
-  scale_size_continuous(range = c(3, 1.5)) +
   scale_alpha_manual(values = c(1/10, 1)) +
-  scale_fill_manual(values  = c("navy", "white")) +
+  scale_fill_manual(values = c("navy", "white")) +
+  scale_size_continuous(range = c(3, 1.5)) +
   scale_x_continuous(NULL, limits = c(0, 12),     breaks = NULL) +
   scale_y_continuous(NULL, limits = c(0.75, 3.5), breaks = NULL) +
-  theme(panel.grid      = element_blank(),
-        legend.position = "none") +
-  coord_polar()
+  coord_polar() +
+  theme(legend.position = "none",
+        panel.grid = element_blank())
 ```
 
 ### Using prior information.
@@ -494,15 +499,15 @@ We might update to reproduce the table a the top of page 26, like this.
 t <-
   t %>% 
   select(p_1:p_4, `new count`) %>% 
-  rename(`prior count`   = `new count`) %>% 
+  rename(`prior count` = `new count`) %>% 
   mutate(`factory count` = c(0, 3:0)) %>% 
-  mutate(`new count`     = `prior count` * `factory count`)
+  mutate(`new count` = `prior count` * `factory count`)
 
 t %>% 
   knitr::kable()
 ```
 
-To learn more about `dplyr::select()` and `dplyr::rename()`, check out Baert's exhaustive blog post [*Data Wrangling Part 1: Basic to Advanced Ways to Select Columns*](https://suzan.rbind.io/2018/01/dplyr-tutorial-1/).
+To learn more about `dplyr::select()` and `dplyr::rename()`, check out Baert's exhaustive blog post [*Data wrangling part 1: Basic to advanced ways to select columns*](https://suzan.rbind.io/2018/01/dplyr-tutorial-1/).
 
 ### From counts to probability.
 
@@ -533,7 +538,7 @@ $$
 But since we have to standardize the results to get them into a probability metric, the full equation is:
 
 $$
-\text{plausibility of } p \text{ after } D_{\text{new}} = \frac{\text{ ways } p \text{ can produce } D_{\text{new}} \times \text{ prior plausibility of } p}{\text{sum of the products}}
+\text{plausibility of } p \text{ after } D_\text{new} = \frac{\text{ ways } p \text{ can produce } D_\text{new} \times \text{ prior plausibility of } p}{\text{sum of the products}}
 $$
 
 You might make the table in the middle of page 27 like this.
@@ -543,7 +548,7 @@ t %>%
   select(p_1:p_4) %>% 
   mutate(p                      = seq(from = 0, to = 1, by = .25),
          `ways to produce data` = c(0, 3, 8, 9, 0)) %>% 
-  mutate(plausibility           = `ways to produce data` / sum(`ways to produce data`))
+  mutate(plausibility = `ways to produce data` / sum(`ways to produce data`))
 ```
 
 We just computed the plausibilities, but here's McElreath's R code 2.1.
@@ -576,10 +581,10 @@ Here we'll add the cumulative number of trials, `n_trials`, and the cumulative n
   d %>% 
   mutate(n_trials  = 1:9,
          n_success = cumsum(toss == "w"))
-  )
+)
 ```
 
-Fair warning: We don’t learn the skills for making Figure 2.5 until later in the chapter. So consider the data wrangling steps in this section as something of a preview.
+Fair warning: We don't learn the skills for making Figure 2.5 until later in the chapter. So consider the data wrangling steps in this section as something of a preview.
 
 ```{r, fig.width = 6, fig.height = 5}
 sequence_length <- 50
@@ -599,8 +604,7 @@ d %>%
          likelihood = dbinom(x    = n_success, 
                              size = n_trials, 
                              prob = p_water),
-         strip      = str_c("n = ", n_trials)
-         ) %>% 
+         strip      = str_c("n = ", n_trials)) %>% 
   # the next three lines allow us to normalize the prior and the likelihood, 
   # putting them both in a probability metric 
   group_by(n_trials) %>% 
@@ -617,13 +621,17 @@ d %>%
   facet_wrap(~strip, scales = "free_y")
 ```
 
-If it wasn't clear in the code, the dashed curves are normalized prior densities. The solid ones are normalized likelihoods. If you don't normalize (i.e., divide the density by the sum of the density), their respective heights don't match up with those in the text. Furthermore, it’s the normalization that makes them directly comparable. 
+If it wasn't clear in the code, the dashed curves are normalized prior densities. The solid ones are normalized likelihoods. If you don't normalize (i.e., divide the density by the sum of the density), their respective heights don't match up with those in the text. Furthermore, it's the normalization that makes them directly comparable.
 
-To learn more about `dplyr::group_by()` and its opposite `dplyr::ungroup()`, check out [*R4DS*, Chapter 5](http://r4ds.had.co.nz/transform.html). To learn about `tidyr::expand()`, go [here](https://tidyr.tidyverse.org/reference/expand.html).
+To learn more about `dplyr::group_by()` and its opposite `dplyr::ungroup()`, check out [*R4DS*, Chapter 5](https://r4ds.had.co.nz/transform.html). To learn about `tidyr::expand()`, go [here](https://tidyr.tidyverse.org/reference/expand.html).
 
 ### Evaluate.
 
-It's worth repeating the **Rethinking: Deflationary statistics** box, here.
+> The Bayesian model learns in a way that is demonstrably optimal, provided that the real, large world is accurately described by the model. This is to say that your Bayesian machine guarantees perfect inference, within the small world. No other way of using the available information, and beginning with the same state of information, could do better. 
+>
+> Don't get too excited about this logical virtue, however. The calculations may malfunction, so results always have to be checked. And if there are important differences between the model and reality, then there is no logical guarantee of large world performance. (p. 31)
+
+#### Rethinking: Deflationary statistics.
 
 > It may be that Bayesian inference is the best general purpose method of inference known. However, Bayesian inference is much less powerful than we'd like it to be. There is no approach to inference that provides universal guarantees. No branch of applied mathematics has unfettered access to reality, because math is not discovered, like the proton. Instead it is invented, like the shovel. (p. 32)
 
@@ -637,15 +645,15 @@ It's worth repeating the **Rethinking: Deflationary statistics** box, here.
 
 If you let the count of water be $w$ and the number of tosses be $n$, then the binomial likelihood may be expressed as:
 
-$$\text{Pr} (w|n, p) = \frac{n!}{w!(n - w)!} p^w (1 - p)^{n - w}$$
+$$\text{Pr}(w|n, p) = \frac{n!}{w!(n - w)!} p^w (1 - p)^{n - w}$$
 
-Given a probability of .5, the binomial likelihood of 6 out of 9 tosses coming out water is:
+Given a probability of .5, we can use the `dbinom()` function to determine the likelihood of 6 out of 9 tosses coming out water.
 
 ```{r}
 dbinom(x = 6, size = 9, prob = .5)
 ```
 
-McElreath suggested we change the values of `prob`. Let's do so over the parameter space.
+McElreath suggested we change the values of `prob`. Let's do so over the parameter space, $[0, 1]$.
 
 ```{r, fig.width = 3, fig.height = 2}
 tibble(prob = seq(from = 0, to = 1, by = .01)) %>% 
@@ -659,17 +667,19 @@ tibble(prob = seq(from = 0, to = 1, by = .01)) %>%
 
 ### Parameters.
 
-McElreath started off his **Rethinking: Datum or parameter?** box with:
+"For most likelihood functions, there are adjustable inputs" (p. 34). These are the **parameters**.
+
+#### Rethinking: Datum or parameter?
 
 > It is typical to conceive of data and parameters as completely different kinds of entities. Data are measures and known; parameters are unknown and must be estimated from data. Usefully, in the Bayesian framework the distinction between a datum and a parameter is fuzzy. (p. 34)
 
-For more in this topic, check out his lecture [*Understanding Bayesian Statistics without Frequentist Language*](https://www.youtube.com/watch?v=yakg94HyWdE&frags=pl%2Cwn).
+For more in this topic, check out his lecture, [*Understanding Bayesian statistics without frequentist language*](https://www.youtube.com/watch?v=yakg94HyWdE&frags=pl%2Cwn).
 
 ### Prior.
 
 > So where do priors come from? They are engineering assumptions, chosen to help the machine learn. The flat prior in Figure 2.5 is very common, but it is hardly ever the best prior. You'll see later in the book that priors that gently nudge the machine usually improve inference. Such priors are sometimes called regularizing or weakly informative priors. (p. 35)
 
-To learn more about "regularizing or weakly informative priors," check out the [*Prior Choice Recommendations* wiki from the Stan team](https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations).
+To learn more about "regularizing or weakly informative priors," check out the [*Prior choice recommendations* wiki from the Stan team](https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations).
 
 #### Overthinking: Prior as a probability distribution
 
@@ -695,32 +705,33 @@ tibble(a = 0,
   scale_x_continuous(breaks = c(0, 1:3, 9)) +
   scale_y_continuous(breaks = c(0, 1/9, 1/3, 1/2, 2/3, 1),
                      labels = c("0", "1/9", "1/3", "1/2", "2/3", "1")) +
-  theme(panel.grid.minor   = element_blank(),
+  theme(panel.grid.minor = element_blank(),
         panel.grid.major.x = element_blank()) +
   facet_wrap(~b, ncol = 5)
 ```
 
-And as we'll learn much later in the project, the $\text{Uniform} (0, 1)$ distribution is special in that we can also express it as the beta distribution for which $\alpha = 1 \text{ and } \beta = 1$. E.g.,
+And as we'll learn much later in the project, the $\operatorname{Uniform}(0, 1)$ distribution is special in that we can also express it as the beta distribution for which $\alpha = 1 \text{ and } \beta = 1$. E.g.,
 
 ```{r, fig.width = 2.5, fig.height = 2}
 tibble(parameter_space = seq(from = 0, to = 1, length.out = 50)) %>% 
+  # note our use of the `dbeta()` function
   mutate(prob = dbeta(parameter_space, 1, 1)) %>% 
   
   ggplot(aes(x = parameter_space, ymin = 0, ymax = prob)) +
   geom_ribbon() +
-  coord_cartesian(ylim = 0:2) +
+  ylim(0, 2) +
   theme(panel.grid = element_blank())
 ```
 
 ### Posterior.
 
-If we continue to focus on the globe tossing example, the posterior probability a toss will be water may be expressed as:
+If we continue to focus on the globe tossing example, the posterior probability a toss will be water may be expressed as
 
-$$\text{Pr} (p|w) = \frac{\text{Pr} (w|p) \text{Pr} (p)}{\text{Pr} (w)}$$
+$$\text{Pr}(p|w) = \frac{\text{Pr}(w|p) \; \text{Pr}(p)}{\text{Pr}(w)}.$$
 
-More generically and in words, this is:
+More generically and in words, this is
 
-$$\text{Posterior} = \frac{\text{Likelihood} \times \text{Prior}}{\text{Average Likelihood}}$$
+$$\text{Posterior} = \frac{\text{Likelihood} \times \text{Prior}}{\text{Average Likelihood}}.$$
 
 ## Making the model go
 
@@ -735,7 +746,7 @@ d <-
   arrange(row, probability) %>% 
   mutate(prior = ifelse(row == "flat", 1,
                         ifelse(row == "stepped", rep(0:1, each = sequence_length / 2),
-                               exp(-abs(probability - .5) / .25) / ( 2 * .25))),
+                               exp(-abs(probability - .5) / .25) / (2 * .25))),
          likelihood = dbinom(x = 6, size = 9, prob = probability)) %>% 
   group_by(row) %>% 
   mutate(posterior = prior * likelihood / sum(prior * likelihood)) %>% 
@@ -745,77 +756,74 @@ d <-
          row = factor(row, levels = c("flat", "stepped", "Laplace"))) 
 ```
 
-To learn more about `dplyr::arrange()`, chech out [*R4DS*, Chapter 5.3](http://r4ds.had.co.nz/transform.html#arrange-rows-with-arrange).
+To learn more about `dplyr::arrange()`, check out [*R4DS*, Chapter 5.3](https://r4ds.had.co.nz/transform.html#arrange-rows-with-arrange).
 
-In order to avoid unnecessary facet labels for the rows, it was easier to just make each column of the plot separately and then recombine them with `gridExtra::grid.arrange()`.
+In order to avoid unnecessary facet labels for the rows, it was easier to just make each column of the plot separately. We can then use the elegant and powerful syntax from [Thomas Lin Pedersen](https://twitter.com/thomasp85)'s [-@R-patchwork] [**patchwork** package](https://patchwork.data-imaginist.com/) to combine them.
 
 ```{r, fig.width = 6, fig.height = 5, warning = F, message = F}
 p1 <-
   d %>%
-  filter(key == "prior") %>% 
+  filter(row == "flat") %>% 
   ggplot(aes(x = probability, y = value)) +
   geom_line() +
-  scale_x_continuous(NULL, breaks = c(0, .5, 1)) +
+  scale_x_continuous(NULL, breaks = NULL) +
   scale_y_continuous(NULL, breaks = NULL) +
-  labs(subtitle = "prior") +
-  theme(panel.grid       = element_blank(),
-        strip.background = element_blank(),
-        strip.text       = element_blank()) +
-  facet_wrap(row ~ ., scales = "free_y", ncol = 1)
+  theme(panel.grid = element_blank()) +
+  facet_wrap(~key, scales = "free_y")
 
 p2 <-
   d %>%
-  filter(key == "likelihood") %>% 
+  filter(row == "stepped") %>% 
   ggplot(aes(x = probability, y = value)) +
   geom_line() +
-  scale_x_continuous(NULL, breaks = c(0, .5, 1)) +
+  scale_x_continuous(NULL, breaks = NULL) +
   scale_y_continuous(NULL, breaks = NULL) +
-  labs(subtitle = "likelihood") +
-  theme(panel.grid       = element_blank(),
+  theme(panel.grid = element_blank(),
         strip.background = element_blank(),
-        strip.text       = element_blank()) +
-  facet_wrap(row ~ ., scales = "free_y", ncol = 1)
+        strip.text = element_blank()) +
+  facet_wrap(~key, scales = "free_y")
 
 p3 <-
   d %>%
-  filter(key == "posterior") %>% 
+  filter(row == "Laplace") %>% 
   ggplot(aes(x = probability, y = value)) +
   geom_line() +
   scale_x_continuous(NULL, breaks = c(0, .5, 1)) +
   scale_y_continuous(NULL, breaks = NULL) +
-  labs(subtitle = "posterior") +
-  theme(panel.grid       = element_blank(),
+  theme(panel.grid = element_blank(),
         strip.background = element_blank(),
-        strip.text       = element_blank()) +
-  facet_wrap(row ~ ., scales = "free_y", ncol = 1)
+        strip.text = element_blank()) +
+  facet_wrap(~key, scales = "free_y")
 
-library(gridExtra)
+library(patchwork)
 
-grid.arrange(p1, p2, p3, ncol = 3)
+p1 / p2 / p3
 ```
 
-I'm not sure if it's the same McElreath used in the text, but the formula I used for the tirangle-shaped prior is the [Laplace distribution](http://ugrad.stat.ubc.ca/R/library/rmutil/html/Laplace.html) with a location of .5 and a dispersion of .25.
+I'm not sure if it's the same McElreath used in the text, but the formula I used for the triangle-shaped prior is the [Laplace distribution](https://rdrr.io/cran/rmutil/man/Laplace.html) with a location of .5 and a dispersion of .25.
 
-Also, to learn all about `dplyr::filter()`, check out Baert's [*Data Wrangling Part 3: Basic and more advanced ways to filter rows*](https://suzan.rbind.io/2018/02/dplyr-tutorial-3/).
+Also, to learn all about `dplyr::filter()`, check out Baert's [*Data wrangling part 3: Basic and more advanced ways to filter rows*](https://suzan.rbind.io/2018/02/dplyr-tutorial-3/).
 
 ### Grid approximation.
 
 We just employed grid approximation over the last figure. In order to get nice smooth lines, we computed the posterior over 1000 evenly-spaced points on the probability space. Here we'll prepare for Figure 2.7 with 20.
 
 ```{r}
-(d <-
- tibble(p_grid            = seq(from = 0, to = 1, length.out = 20),  # define grid
-        prior             = 1) %>%                                   # define prior
-   mutate(likelihood      = dbinom(6, size = 9, prob = p_grid)) %>%  # compute likelihood at each value in grid
-   mutate(unstd_posterior = likelihood * prior) %>%                  # compute product of likelihood and prior
-   mutate(posterior       = unstd_posterior / sum(unstd_posterior))  # standardize the posterior, so it sums to 1
+(
+  d <-
+    tibble(p_grid = seq(from = 0, to = 1, length.out = 20),      # define grid
+           prior  = 1) %>%                                       # define prior
+    mutate(likelihood = dbinom(6, size = 9, prob = p_grid)) %>%  # compute likelihood at each value in grid
+    mutate(unstd_posterior = likelihood * prior) %>%             # compute product of likelihood and prior
+    mutate(posterior = unstd_posterior / sum(unstd_posterior))   # standardize the posterior, so it sums to 1
 )
 ```
 
-Here's the right panel of Figure 2.7.
+Here's the code for the right panel of Figure 2.7.
 
-```{r, fig.width = 3, fig.height = 2.75}
-d %>% 
+```{r}
+p1 <-
+  d %>% 
   ggplot(aes(x = p_grid, y = posterior)) +
   geom_point() +
   geom_line() +
@@ -825,14 +833,15 @@ d %>%
   theme(panel.grid = element_blank())
 ```
 
-Here it is with just 5 points, the left hand panel of Figure 2.7.
+Now here's the code for the left hand panel of Figure 2.7.
 
-```{r, fig.width = 3, fig.height = 2.75}
-tibble(p_grid            = seq(from = 0, to = 1, length.out = 5),
-       prior             = 1) %>%
-  mutate(likelihood      = dbinom(6, size = 9, prob = p_grid)) %>%
+```{r}
+p2 <-
+  tibble(p_grid = seq(from = 0, to = 1, length.out = 5),
+         prior  = 1) %>%
+  mutate(likelihood = dbinom(6, size = 9, prob = p_grid)) %>%
   mutate(unstd_posterior = likelihood * prior) %>%
-  mutate(posterior       = unstd_posterior / sum(unstd_posterior)) %>% 
+  mutate(posterior = unstd_posterior / sum(unstd_posterior)) %>% 
   
   ggplot(aes(x = p_grid, y = posterior)) +
   geom_point() +
@@ -841,6 +850,12 @@ tibble(p_grid            = seq(from = 0, to = 1, length.out = 5),
        x = "probability of water",
        y = "posterior probability") +
   theme(panel.grid = element_blank())
+```
+
+Here we combine them and plot!
+
+```{r, fig.width = 6, fig.height = 3}
+p1 + p2 + plot_annotation(title = "More grid points make for smoother approximations")
 ```
 
 ### Quadratic approximation.
@@ -864,7 +879,7 @@ precis(globe_qa)
 
 In preparation for Figure 2.8, here's the model with $n = 18$ and $n = 36$.
 
-```{r}
+```{r, cache = T}
 globe_qa_18 <-
   rethinking::map(
     alist(
@@ -883,26 +898,29 @@ precis(globe_qa_18)
 precis(globe_qa_36)
 ```
 
-Here's the legwork for Figure 2.8.
+Now make Figure 2.8.
 
 ```{r, fig.width = 8, fig.height = 2.75}
 n_grid <- 100
 
-tibble(p_grid                  = seq(from = 0, to = 1, length.out = n_grid) %>% rep(., times = 3),
-       prior                   = 1,
-       w                       = rep(c(6, 12, 24), each = n_grid),
-       n                       = rep(c(9, 18, 36), each = n_grid),
-       m                       = .67,
-       s                       = rep(c(.16, .11, .08), each = n_grid)) %>%
-  mutate(likelihood            = dbinom(w, size = n, prob = p_grid)) %>%
-  mutate(unstd_grid_posterior  = likelihood * prior,
-         unstd_quad_posterior  = dnorm(p_grid, m, s)) %>%
+# wrangle
+tibble(w = c(6, 12, 24),
+       n = c(9, 18, 36),
+       s = c(.16, .11, .08)) %>% 
+  expand(nesting(w, n, s),
+         p_grid = seq(from = 0, to = 1, length.out = n_grid)) %>% 
+  mutate(prior = 1,
+         m     = .67)  %>%
+  mutate(likelihood = dbinom(w, size = n, prob = p_grid)) %>%
+  mutate(unstd_grid_posterior = likelihood * prior,
+         unstd_quad_posterior = dnorm(p_grid, m, s)) %>%
   group_by(w) %>% 
-  mutate(grid_posterior        = unstd_grid_posterior / sum(unstd_grid_posterior),
-         quad_posterior        = unstd_quad_posterior / sum(unstd_quad_posterior),
+  mutate(grid_posterior = unstd_grid_posterior / sum(unstd_grid_posterior),
+         quad_posterior = unstd_quad_posterior / sum(unstd_quad_posterior),
          n = str_c("n = ", n)) %>% 
   mutate(n = factor(n, levels = c("n = 9", "n = 18", "n = 36"))) %>% 
   
+  # plot
   ggplot(aes(x = p_grid)) +
   geom_line(aes(y = grid_posterior)) +
   geom_line(aes(y = quad_posterior),
@@ -915,52 +933,46 @@ tibble(p_grid                  = seq(from = 0, to = 1, length.out = n_grid) %>% 
 
 ### Markov chain Monte Carlo.
 
-Since the main goal of this project is to highlight brms, we may as fit a model. This seems like an appropriately named subsection to do so. First we’ll have to load the package.
+Since the main goal of this project is to highlight brms, we may as fit a model. This seems like an appropriately named subsection to do so. First we'll have to load the package.
 
 ```{r, warning = F, message = F}
 library(brms)
 ```
 
-Here we'll re-fit the last model from above wherein $w = 24$ and $n = 36$. 
+Here re-fit the last model from above, the one for which $w = 24$ and $n = 36$. 
 
-```{r globe_qa_brms, cache = T, message = F, results = 'hide'}
-globe_qa_brms <-
+```{r b2.01}
+b2.1 <-
   brm(data = list(w = 24), 
       family = binomial(link = "identity"),
-      w | trials(36) ~ 1,
-      prior(beta(1, 1), class = Intercept),
-      iter = 4000, warmup = 1000,
-      control = list(adapt_delta = .9),
-      seed = 4)
+      w | trials(36) ~ 0 + Intercept,
+      prior(beta(1, 1), class = b, lb = 0, ub = 1),
+      seed = 2,
+      file = "fits/b02.01")
 ```
 
-The model output looks like so.
+The model output from brms looks like so.
 
 ```{r}
-print(globe_qa_brms)
+print(b2.1)
 ```
 
-There’s a lot going on in that output, which we’ll start to clarify in Chapter 4. For now, focus on the 'Intercept' line. As we'll also learn in Chapter 4, the intercept of a regression model with no predictors is the same as its mean. In the special case of a model using the binomial likelihood, the mean is the probability of a 1 in a given trial, $\theta$. 
+There's a lot going on in that output, which we'll start to clarify in Chapter 4. For now, focus on the 'Intercept' line. As we'll also learn in Chapter 4, the intercept of a regression model with no predictors is the same as its mean. In the special case of a model using the binomial likelihood, the mean is the probability of a 1 in a given trial, $\theta$. 
 
 Let's plot the results of our model and compare them with those from `rethinking::map()`, above.
 
 ```{r, fig.width = 3, fig.height = 2.75}
-posterior_samples(globe_qa_brms) %>% 
+posterior_samples(b2.1) %>% 
   mutate(n = "n = 36") %>%
 
   ggplot(aes(x = b_Intercept)) +
   geom_density(fill = "black") +
-  labs(x = "proportion water") +
-  xlim(0, 1) +
+  scale_x_continuous("proportion water", limits = c(0, 1)) +
   theme(panel.grid = element_blank()) +
   facet_wrap(~n)
 ```
 
-If you’re still confused. Cool. This is just a preview. We’ll start walking through fitting models in brms in Chapter 4 and we'll learn a lot about regression with the binomial likelihood in Chapter 10.
-
-## Reference {-}
-
-[McElreath, R. (2016). *Statistical rethinking: A Bayesian course with examples in R and Stan.* Chapman & Hall/CRC Press.](https://xcelab.net/rm/statistical-rethinking/)
+If you're still confused. Cool. This is just a preview. We'll start walking through fitting models in brms in [Chapter 4][A Gaussian model of height] and we'll learn a lot about regression with the binomial likelihood in [Chapter 10][Counting and Classification].
 
 ## Session info {-}
 
@@ -969,15 +981,10 @@ sessionInfo()
 ```
 
 ```{r, echo = F, warning = F, message = F}
-rm(d, lines_1, lines_2, n_blue, n_white, t, move_over, ways, sequence_length, p1, p2, p3, globe_qa, globe_qa_18, globe_qa_36, n_grid, globe_qa_brms)
+rm(d, lines_1, lines_2, n_blue, n_white, t, move_over, ways, sequence_length, p1, p2, p3, globe_qa, globe_qa_18, globe_qa_36, n_grid, globe_qa_brms, b2.1)
 ```
 
 ```{r, echo = F, warning = F, message = F, results = "hide"}
 pacman::p_unload(pacman::p_loaded(), character.only = TRUE)
-
-ggplot2::theme_set(ggplot2::theme_grey())
-
-bayesplot::color_scheme_set("blue")
 ```
-
 
